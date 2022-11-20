@@ -8,7 +8,7 @@
 
 - 渲染函数版本
 
-`
+```javascript
     function render(){
         return h('div',[
             h('div',[
@@ -16,11 +16,11 @@
             ])
         ])
     }
-`
+```
 
 - JSONDOM树版本
 
-`
+```javascript
     const vdom = {
         tag:'div',
         children:[
@@ -35,19 +35,19 @@
             }
         ]
     }
-`
+```
 
 可以看到虚拟DOM往往通过节点/JSON的方式表达网页。
 
 
 - 真实DOM
 
-`
+```html
     <div>
         <div>
             <span>hello</span>
         </div>
     </div>
-`
+```
 
 可以看到真实的DOM树往往是html代码。
