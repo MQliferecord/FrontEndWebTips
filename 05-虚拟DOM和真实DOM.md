@@ -4,7 +4,7 @@
 
 - 一个简单的虚拟DOM树的例子
 - 渲染函数版本
-'''javascript
+'''
 {
     function render(){
         return h('div',[
@@ -16,7 +16,7 @@
 }
 ''''
 - JSONDOM树版本
-'''javascript
+'''
 {
     const vdom = {
         tag:'div',
@@ -37,7 +37,7 @@
 可以看到虚拟DOM往往通过节点/JSON的方式表达网页。
 
 - 真实DOM
-'''html
+'''
 {
     <div>
         <div>
