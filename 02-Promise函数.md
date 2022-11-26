@@ -1,10 +1,62 @@
 # 什么是Promise函数？
 
-> 简单讲，Promise就是一个对象
+> 简单讲，Promise就是一个对象，需要传参一个函数作为输入。
 
-- 它具有pending(等待态),fulfilled(成功态),rejected（失败态）三种属性。用来通知cpu，await标识的函数是否已经运行完成，是否可以开始执行接下来的回调函数。当成功时，需要有一个成功接收的返回值value，`new Promise((resolve,reject)=>{resolve(value)})`;相应的失败了，需要有一个失败的reason，`new Promise((resolve,reject)=>{reject(reason)})`.
+- Promise具有两个隐藏属性，其中一个是promiseState/promiseResult。其中promiseAtate具有pending(等待态),fulfilled(成功态),rejected（失败态）三种属性。用来通知cpu，await标识的函数是否已经运行完成，是否可以开始执行接下来的回调函数。当成功时，resolve()会存储成功的结果，返回值value，`new Promise((resolve,reject)=>{resolve(value)})`;相应的失败了，reject()会存储失败的reason，`new Promise((resolve,reject)=>{reject(reason)})`.
 
-- Promise具有then()方法，具有两个方法分别是onFulfilled和onRejected，需要分别将value/reason作为第一个参数，第二个参数则是相关的回调函数。
+举个例子：
+
+```javascript
+    const pro = new Promise(()=>{
+    })
+    console.log(pro);//obj([[promiseResult]]为空)
+
+    const pro1 = new Promise((resolve,reject)=>{
+        
+    })
+    cosole.log(pro1);//obj([[promiseResult]]"haha")
+
+    const pro2 = new Promise((resolve,reject)=>{
+        reject("haha");
+    })
+    cosole.log(pro2)resolve("haha");;//obj([[promiseResult]]"haha")并且报错
+
+    const pro3 = new Promise((resolve,reject)=>{
+        resolve("haha");
+        reject("haha");//不执行，promise只存储一次
+    })
+    cosole.log(pro2);//obj([[promiseResult]]"haha")
+```
+
+可以发现无论是resolve("haha")还是reject("haha")实际的值已经存储进了promiseResult，但现在的问题是promiseResult是一个隐藏属性，并不支持pro.promiseResult()的方式直接读取出来。但是promise提供了 **then()** 方法。
+
+- Promise具有then()方法，需要输入两个函数作为参数，分别是onFulfilled/onRejected，函数各自的输入，对应于我们存在promiseResult属性里面的value/reason。相应的promise还具有一个额外的方法catch()，只捕捉错误时候的回调，`catch(onRejected) === then(null,onRejected)`.
+
+来看一个例子：
+
+```javascript
+    const pro1 = new Promise((resolve,reject)=>{
+        resolve("haha");
+    })
+    pro1.then((value)=>{
+        console.log(value);//haha
+    },(reason)=>{
+        console.log(reason);
+    })
+
+    const pro2 = new Promise((resolve,reject)=>{
+        throw new Error("错误");
+    })
+    pro2.then((value)=>{
+        console.log(value);
+    },(reason)=>{
+        console.log(reason);//错误+报错信息
+    })
+
+    pro2.catch((reason)=>{
+        console.log(reason);//错误+报错信息
+    })
+```
 
 - 但是很有可能Promise具有then()回调，或者其中穿插了setTimeout本身要得到一个state的状态变化还需要一定的时间，于是可以放置一个`callback[]`数组去保存全部的回调。
 
@@ -158,7 +210,7 @@ Promise相对于传统的回调函数，具有一个显著的特点是链式调�
 ```javascript
     let num = 1;
     function A(){
-        var pro = new Promise(function(resolve,reject){
+        var pro = new Promise((resolve,reject)=>{
             var greet = "hello world";
             resolve(greet);
         });
