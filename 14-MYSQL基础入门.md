@@ -350,3 +350,414 @@ TRUNCATE `student`
 - 相同点：都能够删除数据，不会删除表结构
 
 - 不同点：truncate会重新设计自增列，计数器会归零，并且不会影响事务。delete却会继承自增的序列，比如已经有1-3行数据，然后删除1-3列数据，再增加数据truncate会id回到1，delete会继续从4开始
+
+## 4.DQLy查询数据（最重点）
+
+### 4.1DQL(Data Query Language:数据查询语言)
+
+- 所有查询操作
+
+- 数据库中最核心语言
+
+### 4.2指定查询字段\
+
+> 基础查询SELECT
+
+`SELECT ${字段} FROM ${表格}`
+
+```mysql
+-- 查询所有的学生
+SELECT * FROM student
+
+-- 查询指定的字段
+SELECT `studentNo`,`studentName` FROM `student`
+
+--别名，给结果起一个名字 AS 可以给字段和表起别名
+SELECT `studentNo` AS 学号，`studentName` AS 学生姓名 FROM student
+
+-- 函数，CONCAT(A,B)
+SELECT CONCAT('姓名：'，studentName) AS 新名字 FROM student
+```
+
+> 去重 DISTINCT
+
+去除重复的数据，只显示一条
+
+```mysql
+-- 查询有哪些同学参加了考试
+SELECT * FROM result
+
+--查询有哪些同学参加考试
+SELECT `studentno` FROM result
+
+-- 去重
+SELECT DISTINCT `studentno` FROM result
+
+--查看系统版本
+SELECT VERSION()
+
+SELECT 100*3-1 AS 计算结果
+
+SELECT @@auto_increment_increment
+
+SELECT `studentno`,`studentresult`+1 AS '提分后' FROM result
+```
+
+数据库中的表达式：文本值，列，null， 计算表达式，系统变量...
+
+### 4.3WHERE条件字句
+
+作用：检索其中符合条件的值
+
+> 逻辑运算符
+
+- 与： AND &&
+
+- 或： OR ||
+
+- 非：NOT ！
+
+```mysql
+SELECT `studentno`, `studentname` FROM result 
+WHERE studentresult>=95 AND studentresult<=100
+
+SELECT `studentno`, `studentname` FROM result 
+WHERE studentresult>=95 && studentresult<=100
+
+SELECT `studentno`, `studentname` FROM result 
+WHERE studentresult BETWEEN 95 AND 100
+
+SELECT `studentno`, `studentname` FROM result 
+WHERE NOT studentno=1000
+
+SELECT `studentno`, `studentname` FROM result 
+WHERE studentno!=1000
+```
+
+> 模糊查询
+
+- 空：IS NULL
+
+- 非空：IS NOT NULL
+
+- 区间：BETWEEN ... AND ...
+
+- 匹配：LIKE +  %(代表省略任意的字符个数)  _(代表省略一个字符)
+
+- 范围：IN
+
+```mysql
+--查询姓刘的同学
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE studentname LIKE '刘%';
+
+--查询刘后跟一个字符串
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE studentname LIKE '刘_';
+
+--查询刘后跟两个字符串
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE studentname LIKE '刘__';
+
+--查询包含嘉字
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE studentname LIKE '%嘉%';
+
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE studentno IN (1001,1002,1003);
+
+SELECT  `studentno`,`studentname` FROM `student`
+WHERE `address` IN ('安徽','北京');
+```
+
+### 4.4联表查询
+
+> JOIN 对比
+
+实际的JOIN的方法有三种：
+
+首先先确定这两个表一定有一个字段存在两张表中，比如案例中的studentno，但是两张表中的studnetno的数值是不一定相同的。
+
+- INNER JOIN
+
+返回两张表中重合的那部分数据。
+
+- LEFT JOIN
+
+即使student表中的studentno没有相关的信息，但是只要左表result中studentno有相关信息依然返回。
+
+- RIGHT JOIN
+
+即使result表中的studentno没有相关的信息，但是只要右表student中studentno有相关信息依然返回。
+
+思路：
+
+1. 分析需求，分析查询的字段来自于那些表
+
+2. 确定使用那些查询方式，确定两张表中的交叉点（两个表中哪些部分是交集）
+
+比如：学生表studentNo === 成绩表studentNo
+
+```mysql
+SELECT * FROM student
+SELECT * FROM result
+
+-- INNER JOIN
+SELECT s.studentno,studentname,subjectno,studentresult
+FROM student AS s
+INNER JOIN result AS r
+ON s.studentno = r.studentno
+
+--RIGHT JOIN
+SELECT s.studentno,studentname,subjectno,studentresult
+FROM student AS s
+RIGHT JOIN result AS r
+ON s.studentno = r.studentno
+
+--LEFT JOIN
+SELECT s.studentno,studentname,subjectno,studentresult
+FROM student AS s
+RIGHT JOIN result AS r
+ON s.studentno = r.studentno
+
+SELECT s.studentno,studentname,subjectno,studentresult
+FROM student AS s
+RIGHT JOIN result AS r
+ON s.studentno = r.studentno
+WHERE studentresult IS NULL
+```
+
+> 自连接
+
+就是将一张表拆分为两张表格，这在项目中十分的常见比如vue项目中的三级分类：category1ID,category2ID,category3ID。
+
+举个例子：
+
+1. 以下表是一个二级分类的表格
+
+2. 第一层分类包含了：信息技术（categoryid=2）美术设计（categoryid=5）软件开发（categoryid=3）
+
+3. 第二层分类包括了：办公信息（pid=2）web开发（pid=3）数据库（pid=3）ps技术（pid=5）
+
+！[自连接分类表](images/4.PNG)
+
+```mysql
+SELECT `categoryName` AS '父栏目'，`categoryName` AS '子栏目'
+FROM `category` AS a,`category` AS b
+WHERE a.`categoryid` = b.`pid`
+```
+
+### 4.5分页和排序
+
+> LIMIT 分页
+
+作用：缓解数据库压力
+
+LIMIT 起始值，页面大小
+
+第一页：LIMIT 0,5 从第一条开始，每页显示五条数据
+
+第二页：LIMIT 5,5 从第五条开始，每页显示五条数据
+
+第N页：LIMIT (n-1)*pageSize,pageSize
+
+> 排序ORDER BY 
+
+- 升序 ASC
+
+- 降序 DESC
+
+```mysql
+SELECT s.studentno,studentname,subjectno,studentresult
+FROM student AS s
+RIGHT JOIN result AS r
+ON s.studentno = r.studentno
+INNER JOIN `subject` sub
+ON r.`SubjectNo` = sub.`SubjectNo`
+WHERE subjectName = '数据库结构-1'
+ORDER BY StudentResult DESC
+LIMIT 0,5
+```
+
+### 4.6子查询
+
+WHERE + 嵌套一个子查询语句
+
+```mysql
+--没有嵌套查询
+SELECT studentno,r.studentname,studentresult
+FROM result r
+INNER JOIN `subject` sub
+ON r.`SubjectNo` = sub.`SubjectNo`
+WHERE subjectName = '数据库结构-1'
+ORDER BY StudentResult DESC
+
+--嵌套查询
+SELECT studentno,r.studentname,studentresult
+FROM result r
+WHERE SubjectNo = (
+    SELECT SubjectNo FROM subject
+    WHERE SubjectName = '数据库结构-1'
+)
+ORDER BY StudentResult DESC
+```
+
+## MySQL函数
+
+### 5.1常用函数
+
+数学运算：
+
+```mysql
+SELECT ABS(-8) --绝对值
+SELECT CEILING(9.4) --向上取整
+SELECT FLOOR(9.4) --向下取整
+SELECT RAND() --随机数
+SELECT SIGN(-10) --判断数的符号，负数返回-1，正数返回1
+
+--字符串函数
+SELECT CHAR_LENGTH('NI') --字符串长度
+SELECT CONCAT() -- 拼接字符串
+SELECT INSERT() --替换，插入
+SELECT LOWER() --转小写
+SELECT UPPER() --转小写
+
+--时间日期函数
+SELECT CURRENT_DATE() --获取当前日期
+SELECT CURDATE() --获取当前日期
+SELECT NOW() --获取当前时间
+SELECT LOCALTIME() --获取本地时间
+SELECT SYSDATE() --系统时间
+```
+
+### 5.2聚合函数（常用）
+
+函数名称:
+
+- **COUNT()** 计数
+
+- SUM() 求和
+
+- AVG() 平均值
+
+- MAX() 最大值
+
+- MIN() 最小值
+
+```mysql
+SELECT COUNT(studentname) FROM student; --Count(字段)，会忽略所有的null值
+SELECT COUNT(*) FROM student; --Count(*),不会忽略null值
+SELECT COUNT(1) FROM result; --Count(1)，不会忽略所有的null值
+```
+
+## 6、事务
+
+### 6.1、什么是事务
+
+将一组SQL放在一个批次去执行。
+
+事务原则：ACID原则
+
+- 原子性：要么都成功要么都失败
+
+- 一致性：事务处理前后数据完整性要保持一致
+
+- 隔离性：在多个用户进行并发访问数据库时，各自事务互不影响
+
+- 持久性：事务一旦提交则不可逆，被持久化到数据库中
+
+整个事务流程如下：
+
+```mysql
+--mysql默认开启事务自动提交
+SET autocommit = 0 /*关闭*/
+SET autocommit = 1/*开启，（默认）*/
+
+
+--手动处理事务流程
+SET autocommit = 0 --关闭自动提交
+--事务开启
+START TRANSACTION --标记一个事务的开启，之后的sql都在一个事务里
+
+INSERT XX
+INSERT XX
+
+--提交:持久化
+COMMIT
+--回滚：回到原来的样子：持久化后会失败！
+ROLLBACK
+--事务结束
+SET autocommit = 1 --开启自动提交
+
+--了解即可
+SAVEPOINT 保存点名 --设置事务保存点
+ROLLBACK TO SAVEPOINT 保存点名 --回滚到保存点
+RELEASE SAVEPOINT 保存点名--撤销保存点
+```
+
+实际的案例：
+
+```mysql
+CREATE  DATABASE shop CHARACTER SET utf8 COLLATE utf8_general_ci
+USE shop
+
+CREATE TABLE `account`(
+    `id` INT(3) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(30) NOT NULL,
+    `money` DECIMAL(9,2) NOT NULL,
+    PRIMARY KEY (`id`)
+)ENGINE-INNDB DEFAULT CHARSET=utf8
+
+INSERT INTO account(`name`,`money`)
+VALUES(`A`,2000.00),(`B`,10000.00)
+
+--模拟事务
+SET autocommit = 0;
+START TRANSACTION
+
+UPDATE account SET money = money-500
+WHERE `name` = A
+UPDATE account SET money = money+500
+WHERE `name` = B
+
+COMMIT;--事务一旦被提交就无法回滚
+ROLLBACK;
+SET autocommit = 1;
+```
+
+## 7、索引
+
+索引的本质是帮助SQL高效获取数据的数据结构算法。
+
+### 7.1索引的分类
+
+- 主键索引（PRIMARY KEY）：唯一的标识，不可重复，只能将一个列作为主键
+
+- 唯一索引（UNIQUE KEY）：只是避免重复的列出现。但是其实可以将多个列标识为唯一索引
+
+- 常规索引（KEY/INDEX）：默认索引，INDEX/KEY关键字设置
+
+- 全文索引（FULLTEXT）：只在特定的引擎下有，快速定位数据
+
+```mysql
+--显示所有的索引信息
+SHOW INDEX FROM student
+
+--增加一个全文索引
+ALTER TABLE school.student ADD FULLTEXT INDEX `studentName`(`studentName`)
+
+--EXPLAIN 分析sql执行的情况
+EXPLAIN SELECT * FROM student;--普通索引
+
+EXPLAIN SELECT * FROM student WHERE MATCH(studentName) AGAINST('刘')
+```
+
+### 7.2索引的原则
+
+- 不要对经常变动的数据加索引
+
+- 小数据量不需要索引
+
+- 索引一般加在用来查询的字段
+
+> 索引的数据结构：BTREE（INNDB默认的数据结构）
