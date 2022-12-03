@@ -761,3 +761,134 @@ EXPLAIN SELECT * FROM student WHERE MATCH(studentName) AGAINST('刘')
 - 索引一般加在用来查询的字段
 
 > 索引的数据结构：BTREE（INNDB默认的数据结构）
+
+## 8、权限管理
+
+### 8.1用户权限
+
+用户表：mysql.user
+
+作用：本质是对这张表进行增删改查
+
+```mysql
+--创建用户 CREATE USER ${名字} IDENTIFIED BY '密码'
+CREATE USER MQliferecord IDENTIFIED BY '123456'
+
+--修改指定用户密码
+SET PASSWORD = PASSWORD('111111')
+--修改当前用户密码
+SET PASSWORD FOR MQliferecord = PASSWORD('111111')
+
+--给用户重命名RENAME USER ${旧名字} TO ${新名字}
+RENAME USER MQliferecord TO MQliferecord2
+
+--用户授权，授予全部权限，除了给其他用户授权
+GRANT ALL PRIVILEGES ON *.* TO MQliferecord2
+
+--查看权限
+SHOW GRANT FOR MQliferecord2
+SHOW GRANT FOR root@localhost
+
+--撤销权限
+REVOKE ALL PRIVILEGES ON *.* FROM MQliferecord
+
+--删除用户
+DROP USER MQliferecord
+```
+
+### 8.2MqSQL备份数据库
+
+MySQL数据库备份方式：
+
+- 直接拷贝物理的DATA文件
+
+- 可视化工具备份导出
+
+- 命令行导出：MYSQLDUMP(命令行是在cmd的命令行界面)，具体的使用方式如下：
+
+![命令行导出](images/5.PNG)
+
+- 命令行导入：source ${sql文件地址}
+
+![命令行导入](images/6.PNG)
+
+## 9、规范数据库设计
+
+> 糟糕的数据库设计
+
+- 数据冗余，浪费空间
+
+- 数据库插入和删除都很麻烦
+
+- 程序性能差
+
+> 良好的数据库设计
+
+- 节省内存空间
+
+- 方便数据库的完整性
+
+- 方便开发系统
+
+> 软件开发中，关于数据库的设计
+
+- 分析需求
+
+- 设计关系图
+
+> 设计数据库的步骤：（个人博客）
+
+- 收集信息，分析需求：
+
+1. 用户表（用户登录注销，用户的个人信息，写博客，创建分类）
+
+2. 分类表（文章分类）
+
+3. 文章表（文章信息）
+
+4. 友链表（友链信息）
+
+5. 评论表（评论信息）
+
+- 标识实体（把需求落地到每个字段）
+
+1. 数据库尽量不用驼峰命名（因为不区分大小写），使用'_'命名
+
+2. 相关的表的信息可以有id,user,password等等信息。
+
+### 9.2三大范式
+
+为什么需要数据规范化？
+
+- 信息重复
+
+- 更新异常
+
+- 插入异常
+
+- 删除异常
+
+> 三大范式
+
+- 第一范式（1NF）：表格内的内容必须是不可再分的，保证每列的原子性。
+
+- 第二范式（2NF）：每张表只描述一件事情。每张表的每列只和主键相关，其他的不相关的不能包括在这张表中。
+
+- 第三范式（3NF）：每张表的每列必须直接相关，不能间接相关。
+
+## 10、JDBC（重点）
+
+### 10.1、数据库驱动
+
+JDBC主要是JAVA使用的驱动包，但是我主要求职方向还是JS+前端，所以我这部分没有记相关的笔记主要是看了一下大致的一个思路。
+
+根据我个人的理解，JDBC的功能在前端类似于Nodej中的express或者是Nestjs包。
+
+
+
+
+
+
+
+
+
