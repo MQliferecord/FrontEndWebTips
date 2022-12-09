@@ -30,7 +30,7 @@ CORS是一般是后端写在服务器端的一些指令，前端在使用Nodejs�
 
 一下列出几个cors在服务器端经常配置的一些指令：
 
-1. Access-Control-Allow-Origin:对于允许的跨域的地址进行配置，一般来说的默认配置是'*'，意思是允许所有的地址访问。如果被设置成http://127.0.0.1，意思就是只允许这个地址进行端口的访问，其他的地址都无法访问这个网页。
+1. Access-Control-Allow-Origin:对于允许的跨域的地址进行配置，一般来说的默认配置是'*'，意思是允许所有的地址访问。如果被设置成HOST地址，意思就是只允许这个地址进行端口的访问，其他的地址都无法访问这个网页。
 
 2. Access-Control-Allow-Headers:网页信息传递的编码格式，一般默认设置是Content-type，表示允许所有的格式进行跨域信息的传输。常见的Content-type有application/x-www-form-unlencoded（表单数据的默认传送格式），multiple/form-data（也是表单传送的常见可选格式，当需要去传送提交文件的时候，就需要将axios的headers去设置为multiple/form-data），application/json、application/xml等等
 
@@ -80,7 +80,7 @@ HTTP2.0：首先HTTP1.1的解析方式是使用文本格式，所以Content-type
 
 3. Content-Type:application/x-www-form-urlencoded：
 
-4面试题4：Keep-alive在http响应中起到了什么作用。
+> 面试题4：Keep-alive在http响应中起到了什么作用。
 
 Keep-alive(一直保持连接)是HTTP1.1添加的属性，保持connection的长时间的连通，能够一直发送多个请求，不再像HTTP1.0的时候一次连接只能发送一个请求，连接就会关闭。能够节省很多重复打开连接关闭连接的时间。加快网络的通信过程。
 
@@ -111,6 +111,16 @@ username=admin&password=admin：有时候会进行的一个加密，所以一般
  **响应体**
 
  DOM结构
+
+### 浏览器 和 服务器 的通信过程
+
+> 面试题6：浏览器输入地址以后发生了什么？
+
+1. DNS解析，获取网站的I地址
+2. 浏览器需要和服务器建立连接（tcp/ip）
+3. 向服务器发送请求（http协议）
+4. 夫区其处理请求，并返回响应（http协议）
+5. 浏览器将相应的页面进行渲染
 
 
 
