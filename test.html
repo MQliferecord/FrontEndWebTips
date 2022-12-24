@@ -10,24 +10,10 @@
 
 <body>
     <script>
-const prevObj = {
-    name:'MQ',
-    hobbies:['coding','reading','genshin'],
-    getHobbies:function(){
-        let res = ''
-        for(let i = 0;i<this.hobbies.length;i++){
-            res += this.hobbies[i]+' '
-        }
-        let ans = res.slice(0,res.length-1);
-        return ans
-    }
-} 
-
-const copyObj = Object.create(prevObj);
-console.log(copyObj.getHobbies());
-
-copyObj.hobbies.push('Gaming');
-console.log(prevObj.hobbies);
+let values = [1,2,3]
+let iterator = values[Symbol.iterator]();
+console.log(iterator.next())// "{ value: 1, done: false }"
+console.log(iterator.next())// "{ value: 2, done: false }"
     </script>
 </body>
 
