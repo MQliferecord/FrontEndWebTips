@@ -9,3 +9,37 @@ git push -f
 ```
 参考文档：
 !(Git一个关于Push失败的两种解决方案)[https://www.jianshu.com/p/ea6ec80ad5f2]
+
+> 线上代码和本地代码分支不同时，应该如何操作git？
+
+例如：线上代码是分支branchA;本地修复bug代码是branchB。上线时应该如和操作？
+
+- 可以使用merge或者是rebase。
+
+有两种处理办法：
+
+第一种：
+
+```
+//切换到主分支
+git checkout branchA
+//合并副分支
+git merge branchB
+//上线
+git push origin branchA
+```
+
+第二种：
+
+```
+//切换到副分支
+git checkout branchB
+//更新主分支内容到副分支
+git rebase branchA
+//切换到主分支
+git checkout branchA
+//合并副分支
+git merge branchB
+//上线
+git push origin branchA
+```
